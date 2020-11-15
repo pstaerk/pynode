@@ -25,6 +25,7 @@ class NodeGraphics:
         self._node = node # keep track of the node object
         self._x, self._y = position[0], position[1]
         self._shapes = []
+        self._lines = [] # lines which are connected, stores tuples of type and line object
         self._inputs = [] # input graphical representations
         self._outputs = [] # output graphical representations
         self._mainbatch = mainbatch # batch context to draw shapes efficiently
@@ -36,7 +37,7 @@ class NodeGraphics:
         """Calculate the relevant dimensions of the box from the number of inputs,
         label etc.
         """
-        self._width = MINIMUM_LENGTH
+        self._width = MINIMUM_LENGTH + len(self._node._name[10:])*10
         self._height = MINIMUM_HEIGHT
         if len(self._node._inputs) > 3: # Make rect higher if more than 3 inputs
             self._height += len(self._node._inputs[4:])*5
@@ -104,21 +105,29 @@ class NodeGraphics:
             self._shapes.append(tlab)
             self._inputs.append(trect)
 
+    def add_line(self, line_obj, type_of_line):
+        """Add a line, which is connected to the node and needs to be updated
+        if the object were to move. type_of_line has to specify if this is the
+        starting point or the end point, i.e. 'end'/'start'
+        """
+        self._lines = [(line_obj, type_of_line)]
+
     def check_click_location(self, x, y):
         """Check if x, y coordinates are near a input or output.
-        :returns: tuple with 'in'/'out', rectangle object
+        :returns: tuple with 'in'/'out', rectangle object and the number of the input/output
+        that is clicked
         """
         # check inputs
-        for i in self._inputs:
+        for j, i in enumerate(self._inputs):
             if is_in_rectangle(x, y, i):
-                return 'in', i
+                return 'in', i, j
 
         # check outputs
         for i in self._outputs:
             if is_in_rectangle(x, y, i):
-                return 'out', i
+                return 'out', i, j
 
-        return '', False
+        return '', False, -1
 
     def move(self, rel_x, rel_y):
         """Move the object by the relative amount rel_x, rel_y.

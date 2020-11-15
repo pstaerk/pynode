@@ -4,5 +4,8 @@ I want to have something like [blender's node system](https://docs.blender.org/m
 
 ## Todos
  - [x] Draw nodes
- - [ ] Connect them
+ - [x] Connect them
+ - [ ] Move and edit them
+ - [ ] Add new ones
+ - [ ] Make them able to do something
  - [ ] Make them do something useful

@@ -1,5 +1,6 @@
 import pyglet
 from pynode.gui.utils import distribute_in_length
+from pynode.gui.utils import is_in_rectangle
 
 LENGTH_INPUT = 10
 LENGTH_OUTPUT = 10
@@ -24,6 +25,8 @@ class NodeGraphics:
         self._node = node # keep track of the node object
         self._x, self._y = position[0], position[1]
         self._shapes = []
+        self._inputs = [] # input graphical representations
+        self._outputs = [] # output graphical representations
         self._mainbatch = mainbatch # batch context to draw shapes efficiently
         self._nodebatch = nodebatch 
         self._labelbatch = labelbatch
@@ -79,7 +82,7 @@ class NodeGraphics:
             tlab = pyglet.text.Label(inp, x=labx, y=laby, anchor_x='right', align='right', 
                     batch=self._mainbatch, group=self._labelbatch)
             self._shapes.append(tlab)
-        
+            self._outputs.append(trect)
 
     def _create_inputs_dockers(self):
         """Create the docking symbols for the inputs.
@@ -99,6 +102,23 @@ class NodeGraphics:
             labx, laby = hpos + LENGTH_INPUT, vpos, 
             tlab = pyglet.text.Label(inp, x=labx, y=laby, batch=self._mainbatch, group=self._labelbatch)
             self._shapes.append(tlab)
+            self._inputs.append(trect)
+
+    def check_click_location(self, x, y):
+        """Check if x, y coordinates are near a input or output.
+        :returns: tuple with 'in'/'out', rectangle object
+        """
+        # check inputs
+        for i in self._inputs:
+            if is_in_rectangle(x, y, i):
+                return 'in', i
+
+        # check outputs
+        for i in self._outputs:
+            if is_in_rectangle(x, y, i):
+                return 'out', i
+
+        return '', False
 
     def move(self, rel_x, rel_y):
         """Move the object by the relative amount rel_x, rel_y.

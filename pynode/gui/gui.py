@@ -11,6 +11,9 @@ class Gui(pyglet.window.Window):
         """
         super(Gui, self).__init__()
         self._nodes = []
+        self._mainbatch = pyglet.graphics.Batch()
+        self._nodebatch = pyglet.graphics.OrderedGroup(0)
+        self._labelbatch = pyglet.graphics.OrderedGroup(1)
         self.create_nodes(nodes)
 
     def create_nodes(self, nodes):
@@ -20,14 +23,12 @@ class Gui(pyglet.window.Window):
         """
         print(nodes)
         for n in nodes:
-            tn = NodeGraphics(n, (100, 200))
+            tn = NodeGraphics(n, (100, 200), self._mainbatch, self._nodebatch, self._labelbatch)
             self._nodes.append(tn)
 
     def on_draw(self):
         self.clear()
-        for n in self._nodes:
-            print(f'Drawing node {n}')
-            n.draw()
+        self._mainbatch.draw()
 
     def on_mouse_press(self, x, y, button, modifiers):
         """Tell the window what to do when the mouse is pressed.
@@ -37,4 +38,7 @@ class Gui(pyglet.window.Window):
     def on_mouse_drag(self, x, y, dx, dy, buttons, modifiers):
         """What to do when mouse is dragged.
         """
+        # for n in self._nodes:
+            # n.is_on_input(x, y)
+            # if n.on_input(x, y)
         pass # currently nothing has to be done.

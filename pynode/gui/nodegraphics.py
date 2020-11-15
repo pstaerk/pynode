@@ -18,12 +18,15 @@ LABEL_YOFFSET = 4
 
 class NodeGraphics:
     """A graphical representation of a node."""
-    def __init__(self, node, position):
+    def __init__(self, node, position, mainbatch, nodebatch, labelbatch):
         """Create a node pyglet object to be displayed on the graphical ui.
         """
         self._node = node # keep track of the node object
         self._x, self._y = position[0], position[1]
         self._shapes = []
+        self._mainbatch = mainbatch # batch context to draw shapes efficiently
+        self._nodebatch = nodebatch 
+        self._labelbatch = labelbatch
         self._create_shapes()
 
     def _calc_shapes(self):
@@ -47,12 +50,12 @@ class NodeGraphics:
         """Create the basic shape that is the node.
         """
         rect = pyglet.shapes.Rectangle(self._x, self._y, self._width, self._height,
-                color=NODE_COLOR)
+                color=NODE_COLOR, batch=self._mainbatch, group=self._nodebatch)
         # Add a label bar above the rectangle
         rect2 = pyglet.shapes.Rectangle(self._x, self._y+self._height, self._width, 
-                LABEL_HEIGHT, color=LABEL_COLOR)
+                LABEL_HEIGHT, color=LABEL_COLOR, batch=self._mainbatch, group=self._nodebatch)
         lab = pyglet.text.Label(text=self._node._name, x=self._x, 
-                y=self._y+self._height+LABEL_YOFFSET)
+                y=self._y+self._height+LABEL_YOFFSET, batch=self._mainbatch, group=self._labelbatch)
         self._shapes.append(rect)
         self._shapes.append(rect2)
         self._shapes.append(lab)
@@ -66,14 +69,15 @@ class NodeGraphics:
             place_height = self._height - 2*OUTPUTS_UPPER_LOWER # Length onto which ins placed
             vpos = distribute_in_length(i, nr_ins, LENGTH_OUTPUT, place_height)
             vpos += self._y + OUTPUTS_UPPER_LOWER
-            hpos = self._x + OUTPUTS_OFFSET + self._width - LENGTH_OUTPUT
+            hpos = self._x - OUTPUTS_OFFSET + self._width - LENGTH_OUTPUT
             trect = pyglet.shapes.Rectangle(hpos, vpos, LENGTH_OUTPUT, LENGTH_OUTPUT,
-                    color=OUTPUT_COLOR)
+                    color=OUTPUT_COLOR, batch=self._mainbatch, group=self._nodebatch)
             self._shapes.append(trect)
 
             # Place labels
             labx, laby = hpos, vpos, 
-            tlab = pyglet.text.Label(inp, x=labx, y=laby, anchor_x='right', align='right')
+            tlab = pyglet.text.Label(inp, x=labx, y=laby, anchor_x='right', align='right', 
+                    batch=self._mainbatch, group=self._labelbatch)
             self._shapes.append(tlab)
         
 
@@ -88,12 +92,12 @@ class NodeGraphics:
             vpos += self._y + INPUTS_UPPER_LOWER
             hpos = self._x + INPUTS_OFFSET
             trect = pyglet.shapes.Rectangle(hpos, vpos, LENGTH_INPUT, LENGTH_INPUT,
-                    color=INPUT_COLOR)
+                    color=INPUT_COLOR, batch=self._mainbatch, group=self._nodebatch)
             self._shapes.append(trect)
 
             # Place labels
             labx, laby = hpos + LENGTH_INPUT, vpos, 
-            tlab = pyglet.text.Label(inp, x=labx, y=laby)
+            tlab = pyglet.text.Label(inp, x=labx, y=laby, batch=self._mainbatch, group=self._labelbatch)
             self._shapes.append(tlab)
 
     def move(self, rel_x, rel_y):
